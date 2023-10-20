@@ -1,9 +1,5 @@
 #the Graph class contains the original graph. It is NOT meant to be modified once it's loaded.
-import numpy as np
 from collections import deque
-import random
-import math
-import pprint
 class Graph: 
     def __init__(self,OriginalGraph,adjList):
         self.numVertices = len(adjList)
@@ -13,17 +9,15 @@ class Graph:
         self.outside_adjList = {}
         for i in range(self.numVertices):
             self.distanceDict[i] = None
-    
+
     def removeNode(self,node): 
-        #del self.adjList[node]
-        #self.numVertices = len(self.adjList)
         self.adjList[node] = []
     
         #remove instances of node from adjList
-        for vertex in self.adjList:
-            for neighbor in self.adjList[vertex]:
+        for node in self.adjList:
+            for neighbor in self.adjList[node]:
                 if neighbor == node:
-                    self.adjList[vertex].remove(neighbor)
+                    self.adjList[node].remove(neighbor)
 
     def getMinimalSubtree(self,v,K):
         minimalSubtree = []
@@ -31,13 +25,18 @@ class Graph:
         for layer in self.getBFSTree(v):
             for layer_node in self.getBFSTree(v)[layer]:
                 for subgraph in K:
-                    if K.index(subgraph) == False:
+                    if found[K.index(subgraph)] == False:
                         for subgraph_node in subgraph:
-                            if layer_node in list(dict.keys(self.outside_adjList)):
-                                if subgraph_node in self.outside_adjList[layer_node]:
-                                    found[K.index(subgraph)]=True
-                                    minimalSubtree.append(self.getShortestPath(v,layer_node))
-        return minimalSubtree
+                            if int(subgraph_node) in self.outside_adjList[layer_node]:
+                                print("YEAHHH")
+                                found[K.index(subgraph)]=True
+                                minimalSubtree.append(self.getShortestPath(v,layer_node))
+        total = []
+        for i in minimalSubtree: 
+            for j in i:
+                total.append(j)
+        #total = set(total)
+        return list(set(total))
 
     def getShortestPath(self,start,end): #returns a list of nodes which make up the shortest path between a start and end node.
         pred=[0 for i in range(self.numVertices)]
@@ -129,7 +128,7 @@ class Graph:
             if largestComponentKey == None:
                 largestComponentKey = component
             else:
-                if len(connectedComponents[component]>len(connectedComponents[largestComponentKey])):
+                if int(len(connectedComponents[component])>len(connectedComponents[largestComponentKey])):
                     largestComponentKey = component
         return connectedComponents[largestComponentKey]
 
@@ -153,7 +152,21 @@ class Graph:
             if not found:
                 K.remove(subgraph)
         return K
-            
+    
+    def update_outside_adjList(self,K):
+        self.outside_adjList = {}
+        for key in self.adjList:
+            self.outside_adjList[key] = []
+
+        for key in self.adjList:
+            for subgraph in K:
+                for node in subgraph:
+                    if int(node) in self.OriginalGraph.get_adjList()[key]:
+                        self.outside_adjList[key].append(node)
+
+
+
+                    
     def set_numVertices(self,numVertices):
         self.numVertices = numVertices
     def set_outside_adjList(self,outside_adjList):
